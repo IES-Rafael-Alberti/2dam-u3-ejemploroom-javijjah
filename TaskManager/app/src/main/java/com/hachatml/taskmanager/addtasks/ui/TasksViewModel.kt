@@ -8,6 +8,8 @@ import androidx.lifecycle.ViewModel
 import com.hachatml.taskmanager.addtasks.ui.model.TaskModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import com.hachatml.taskmanager.addtasks.ui.TaskUiState.*
+//todo me quedo en 7.2, pero mejor releer desde 6 o así
 
 @HiltViewModel
 class TasksViewModel @Inject constructor() : ViewModel() {
