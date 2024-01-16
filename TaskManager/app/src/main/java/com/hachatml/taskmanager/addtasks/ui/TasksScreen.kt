@@ -1,6 +1,7 @@
 package com.hachatml.taskmanager.addtasks.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,9 +11,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -25,10 +30,12 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.hachatml.taskmanager.addtasks.ui.model.TaskModel
 
 @Composable
 fun TasksScreen(tasksViewModel: TasksViewModel) {
@@ -44,12 +51,61 @@ fun TasksScreen(tasksViewModel: TasksViewModel) {
         )
         FabDialog(
             Modifier.align(Alignment.BottomEnd),
-            //todo en 3.3 en tasksScreen
             onNewTask = { tasksViewModel.onShowDialogClick() })
         TasksList(tasksViewModel)
     }
 }
+@Composable
+fun TasksList(tasksViewModel: TasksViewModel) {
+    val myTasks: List<TaskModel> = tasksViewModel.tasks
 
+    LazyColumn {
+        //El parámetro opcional key ayuda a optimizar el LazyColumn
+        //Al indicarle que la clave es el id va a ser capaz de identificar cada tarea sin problemas
+        items(myTasks, key = { it.id }) { task ->
+            ItemTask(
+                task,
+                onTaskRemove = { tasksViewModel.onItemRemove(it) },
+                onTaskCheckChanged = { tasksViewModel.onCheckBoxSelected(it) }
+            )
+        }
+    }
+}
+@Composable
+fun ItemTask (
+    taskModel: TaskModel,
+    onTaskRemove: (TaskModel) -> Unit,
+    onTaskCheckChanged: (TaskModel) -> Unit
+) {
+    Card(
+        Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .pointerInput(Unit) {
+                detectTapGestures(onLongPress = {
+                    onTaskRemove(taskModel)
+                })
+            },
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+    ) {
+        Row(
+            Modifier
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = taskModel.task,
+                modifier = Modifier
+                    .padding(horizontal = 4.dp)
+                    .weight(1f)
+            )
+            Checkbox(
+                checked = taskModel.selected,
+                onCheckedChange = { onTaskCheckChanged(taskModel) }
+            )
+        }
+    }
+}
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
 @Composable
 fun AddTasksDialog(
@@ -102,8 +158,8 @@ Column(modifier = Modifier.fillMaxWidth()) {
 
 @Composable
 fun FabDialog(
-    modifier: Modifier
-) {
+    modifier: Modifier,
+    onNewTask: () -> Unit) {
     FloatingActionButton(
         onClick = {
         }, modifier = modifier.padding(16.dp)
