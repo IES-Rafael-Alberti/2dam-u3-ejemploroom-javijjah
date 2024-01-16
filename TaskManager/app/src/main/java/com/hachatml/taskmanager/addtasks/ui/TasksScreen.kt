@@ -161,7 +161,8 @@ fun FabDialog(
     modifier: Modifier,
     onNewTask: () -> Unit) {
     FloatingActionButton(
-        onClick = {
+        onClick =  {
+        onNewTask()
         }, modifier = modifier.padding(16.dp)
     ) {
         Icon(Icons.Filled.Add, contentDescription = "")
